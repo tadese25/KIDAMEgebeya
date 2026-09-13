@@ -9,10 +9,10 @@
     "seed": "node scripts/gen-seed.mjs && node scripts/seed-db.mjs"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
     "next": "^16.3.5",
+    "pg": "^8.23.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "resend": "^6.28.0"

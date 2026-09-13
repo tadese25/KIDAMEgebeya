@@ -5,5 +5,8 @@ data/nova.db
 data/nova.db-journal
 data/nova.db-wal
 data/nova.db-shm
+data/
+.pgdata/
 .DS_Store
 *.log
+.env*.local
