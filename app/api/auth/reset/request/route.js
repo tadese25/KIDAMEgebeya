@@ -12,11 +12,11 @@ export async function POST(request) {
   const email = String(body.email || '').trim().toLowerCase();
   if (!EMAIL_RE.test(email)) return ok({ ok: true });
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = await db.get('SELECT * FROM users WHERE email = ?', email);
   if (!user) return ok({ ok: true }); // don't leak whether an account exists
 
   const origin = new URL(request.url).origin;
-  const token = issueToken({ userId: user.id, type: 'reset', ttlHours: RESET_TTL });
+  const token = await issueToken({ userId: user.id, type: 'reset', ttlHours: RESET_TTL });
   const link = `${origin}/#/reset?token=${token}`;
   const delivery = await sendMail(resetEmail({
     to: user.email,

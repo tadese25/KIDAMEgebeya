@@ -9,18 +9,18 @@ export async function PATCH(request, { params }) {
   let body;
   try { body = await request.json(); } catch { return fail('Invalid JSON body.'); }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const user = await db.get('SELECT * FROM users WHERE id = ?', userId);
   if (!user) return fail('User not found.', 404);
 
   if (body.disabled != null) {
-    db.prepare('UPDATE users SET disabled = ? WHERE id = ?').run(body.disabled ? 1 : 0, userId);
+    await db.run('UPDATE users SET disabled = ? WHERE id = ?', body.disabled ? 1 : 0, userId);
   }
-  const updated = db.prepare(`
+  const updated = await db.get(`
     SELECT u.id, u.name, u.email, u.created_at, u.disabled,
-      (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) AS order_count,
+      (SELECT COUNT(*)::int FROM orders o WHERE o.user_id = u.id) AS order_count,
       (SELECT COALESCE(SUM(o.total), 0) FROM orders o WHERE o.user_id = u.id) AS spent
     FROM users u WHERE u.id = ?
-  `).get(userId);
+  `, userId);
   return ok({
     user: {
       id: updated.id,

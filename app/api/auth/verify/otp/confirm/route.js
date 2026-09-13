@@ -8,13 +8,13 @@ export async function POST(request) {
   const email = String(body.email || '').trim().toLowerCase();
   const code = String(body.code || '').trim();
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = await db.get('SELECT * FROM users WHERE email = ?', email);
   if (!user || !/^\d{6}$/.test(code)) return fail('That code is invalid or has expired. Request a new one.', 400);
 
-  const row = consumeOtp({ userId: user.id, type: 'verify_otp', code });
+  const row = await consumeOtp({ userId: user.id, type: 'verify_otp', code });
   if (!row) return fail('That code is invalid or has expired. Request a new one.', 400);
 
-  db.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(user.id);
-  const fresh = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+  await db.run('UPDATE users SET email_verified = 1 WHERE id = ?', user.id);
+  const fresh = await db.get('SELECT * FROM users WHERE id = ?', user.id);
   return withAuthCookie({ user: publicUser(fresh), verified: true }, signToken(fresh.id));
 }

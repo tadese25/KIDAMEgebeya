@@ -2,7 +2,7 @@ import db from '../../../lib/db.js';
 import { ok } from '../../../lib/api.js';
 
 export async function GET() {
-  const rows = db.prepare('SELECT id, name, tagline, image FROM categories ORDER BY id').all();
+  const rows = await db.all('SELECT id, name, tagline, image FROM categories ORDER BY id');
   return ok({
     categories: rows.map((c) => ({
       id: c.id,

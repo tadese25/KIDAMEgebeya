@@ -51,6 +51,6 @@ export async function GET(request) {
     sql += ', p.featured DESC, p.rating DESC';
   }
 
-  const rows = db.prepare(sql).all(...args);
+  const rows = await db.all(sql, ...args);
   return ok({ products: rows.map(toProduct), total: rows.length });
 }

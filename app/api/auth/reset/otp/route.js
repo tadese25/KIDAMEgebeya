@@ -12,10 +12,10 @@ export async function POST(request) {
   const email = String(body.email || '').trim().toLowerCase();
   if (!EMAIL_RE.test(email)) return ok({ ok: true });
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = await db.get('SELECT * FROM users WHERE email = ?', email);
   if (!user) return ok({ ok: true }); // no account enumeration
 
-  const code = issueOtp({ userId: user.id, type: 'reset_otp', ttlMinutes: OTP_TTL_MIN });
+  const code = await issueOtp({ userId: user.id, type: 'reset_otp', ttlMinutes: OTP_TTL_MIN });
   const delivery = await sendMail(otpEmail({
     to: user.email,
     name: user.name,

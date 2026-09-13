@@ -4,7 +4,7 @@ import { requireAdmin } from '../../../../lib/admin.js';
 
 export async function GET(request) {
   if (!requireAdmin(request)) return fail('Administrator access required.', 401);
-  const rows = db.prepare('SELECT * FROM products ORDER BY name').all();
+  const rows = await db.all('SELECT * FROM products ORDER BY name');
   return ok({ products: rows.map(toProduct) });
 }
 
@@ -23,15 +23,15 @@ export async function POST(request) {
   if (!category) return fail('Product category is required.');
   if (!(price > 0)) return fail('Price must be greater than zero.');
 
-  const cat = db.prepare('SELECT id FROM categories WHERE id = ?').get(category);
+  const cat = await db.get('SELECT id FROM categories WHERE id = ?', category);
   if (!cat) return fail('Category not found.');
 
-  const exists = db.prepare('SELECT id FROM products WHERE id = ?').get(id);
+  const exists = await db.get('SELECT id FROM products WHERE id = ?', id);
   if (exists) return fail('A product with that id already exists.');
 
-  db.prepare(`INSERT INTO products
+  await db.run(`INSERT INTO products
     (id, name, category, brand, price, old_price, rating, reviews_count, stock, featured, tag, colors, sizes, description, specs, images)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     id, name, category,
     String(body.brand || 'NOVA'),
     price,
@@ -48,6 +48,6 @@ export async function POST(request) {
     JSON.stringify(body.images || []),
   );
 
-  const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  const row = await db.get('SELECT * FROM products WHERE id = ?', id);
   return ok({ product: toProduct(row) }, { status: 201 });
 }

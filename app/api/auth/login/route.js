@@ -12,7 +12,7 @@ export async function POST(request) {
 
   if (!email || !password) return fail('Email and password are required.');
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = await db.get('SELECT * FROM users WHERE email = ?', email);
   const valid = user && !user.disabled && bcrypt.compareSync(password, user.password_hash);
   if (!valid) return fail('Incorrect email or password.', 401);
   if (!user.email_verified) {

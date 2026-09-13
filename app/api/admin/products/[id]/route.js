@@ -9,7 +9,7 @@ export async function PUT(request, { params }) {
   let body;
   try { body = await request.json(); } catch { return fail('Invalid JSON body.'); }
 
-  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(pid);
+  const product = await db.get('SELECT * FROM products WHERE id = ?', pid);
   if (!product) return fail('Product not found.', 404);
 
   const name = body.name != null ? String(body.name).trim() : product.name;
@@ -20,14 +20,14 @@ export async function PUT(request, { params }) {
   if (!(price > 0)) return fail('Price must be greater than zero.');
 
   if (body.category) {
-    const cat = db.prepare('SELECT id FROM categories WHERE id = ?').get(category);
+    const cat = await db.get('SELECT id FROM categories WHERE id = ?', category);
     if (!cat) return fail('Category not found.');
   }
 
-  db.prepare(`UPDATE products SET
+  await db.run(`UPDATE products SET
     name = ?, category = ?, brand = ?, price = ?, old_price = ?, featured = ?,
     tag = ?, colors = ?, sizes = ?, description = ?, specs = ?, images = ?, stock = ?
-    WHERE id = ?`).run(
+    WHERE id = ?`,
     name, category,
     body.brand != null ? String(body.brand) : product.brand,
     price,
@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
     pid,
   );
 
-  const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(pid);
+  const updated = await db.get('SELECT * FROM products WHERE id = ?', pid);
   return ok({ product: toProduct(updated) });
 }
 
@@ -51,8 +51,8 @@ export async function DELETE(request, { params }) {
   if (!requireAdmin(request)) return fail('Administrator access required.', 401);
   const { id } = await params;
   const pid = decodeURIComponent(id);
-  const exists = db.prepare('SELECT id FROM products WHERE id = ?').get(pid);
+  const exists = await db.get('SELECT id FROM products WHERE id = ?', pid);
   if (!exists) return fail('Product not found.', 404);
-  db.prepare('DELETE FROM products WHERE id = ?').run(pid);
+  await db.run('DELETE FROM products WHERE id = ?', pid);
   return ok({ deleted: pid });
 }

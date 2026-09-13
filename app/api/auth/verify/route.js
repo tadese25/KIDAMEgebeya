@@ -8,11 +8,11 @@ export async function POST(request) {
   const token = String(body.token || '');
   if (!token) return fail('Verification token is required.');
 
-  const row = consumeToken({ token, type: 'verify' });
+  const row = await consumeToken({ token, type: 'verify' });
   if (!row) return fail('This verification link is invalid or has expired. Request a new one.', 400);
 
-  db.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(row.user_id);
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(row.user_id);
+  await db.run('UPDATE users SET email_verified = 1 WHERE id = ?', row.user_id);
+  const user = await db.get('SELECT * FROM users WHERE id = ?', row.user_id);
 
   // verified → sign the user in
   return withAuthCookie({ user: publicUser(user), verified: true }, signToken(user.id));

@@ -8,13 +8,14 @@ export async function GET(request) {
   const status = url.searchParams.get('status') || '';
   let rows;
   if (status && ORDER_STATUSES.includes(status)) {
-    rows = db.prepare('SELECT * FROM orders WHERE status = ? ORDER BY id DESC').all(status);
+    rows = await db.all('SELECT * FROM orders WHERE status = ? ORDER BY id DESC', status);
   } else {
-    rows = db.prepare('SELECT * FROM orders ORDER BY id DESC').all();
+    rows = await db.all('SELECT * FROM orders ORDER BY id DESC');
   }
-  const orders = rows.map((row) => {
-    const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(row.id);
-    return adminOrder(row, items);
-  });
+  const orders = [];
+  for (const row of rows) {
+    const items = await db.all('SELECT * FROM order_items WHERE order_id = ?', row.id);
+    orders.push(adminOrder(row, items));
+  }
   return ok({ orders });
 }
