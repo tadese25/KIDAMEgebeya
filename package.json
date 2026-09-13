@@ -1,0 +1,20 @@
+{
+  "name": "nova-store",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed": "node scripts/gen-seed.mjs && node scripts/seed-db.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "jsonwebtoken": "^9.0.3",
+    "next": "^16.3.5",
+    "nodemailer": "^10.0.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

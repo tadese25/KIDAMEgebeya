@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+data/nova.db
+data/nova.db-journal
+data/nova.db-wal
+data/nova.db-shm
+.DS_Store
+*.log
